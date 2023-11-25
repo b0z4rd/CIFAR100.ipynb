@@ -75,3 +75,29 @@ def get_split(split_name, dataset_dir=None):
       num_samples=_SPLITS_TO_SIZES[split_name],
       num_classes=_NUM_CLASSES,
       items_to_descriptions=_ITEMS_TO_DESCRIPTIONS)
+
+
+test_dataset = get_split('test', dataset_dir='path_to_dataset_directory')
+iterator = test_dataset.make_one_shot_iterator()
+next_element = iterator.get_next()
+
+
+correct_prediction = tf.equal(tf.argmax(predictions, 1), next_element['label'])
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32 ))
+with tf.Session() as sess:
+
+    sess.run(tf.global_variables_initializer())
+
+    num_correct = 0
+    num_samples = _SPLITS_TO_SIZES['test']
+
+    try:
+        while True:
+            acc = sess.run(accuracy)
+            num_correct += acc
+    except tf.errors.OutOfRangeError:
+        pass
+
+    test_accuracy = num_correct / num_samples
+    print("Test Accuracy:", test_accuracy)
+
